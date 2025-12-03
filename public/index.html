@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Gardenscapes Clone - Match-3 Puzzle Game</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1a5f7a 0%, #0d3b4c 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+    }
+
+    .game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .game-title {
+      color: #FFD700;
+      font-size: 2.5em;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      font-weight: bold;
+    }
+
+    #gameCanvas {
+      background: #2C3E50;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      touch-action: none;
+    }
+
+    .controls {
+      display: flex;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .btn {
+      padding: 12px 25px;
+      font-size: 1em;
+      font-weight: bold;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #27AE60, #2ECC71);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #E74C3C, #C0392B);
+      color: white;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .level-select {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .level-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3498DB, #2980B9);
+      color: white;
+      font-weight: bold;
+      font-size: 1.2em;
+      border: 3px solid #FFD700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .level-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .level-btn.active {
+      background: linear-gradient(135deg, #FFD700, #F39C12);
+      color: #2C3E50;
+    }
+
+    .instructions {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.9em;
+      text-align: center;
+      max-width: 500px;
+      margin-top: 20px;
+    }
+
+    .instructions kbd {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+
+    @media (max-width: 600px) {
+      .game-title {
+        font-size: 1.8em;
+      }
+
+      #gameCanvas {
+        width: 100vw !important;
+        height: auto !important;
+        border-radius: 0;
+      }
+
+      .controls {
+        flex-direction: column;
+        width: 100%;
+        padding: 0 20px;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1 class="game-title">🌸 Garden Match-3</h1>
+
+    <canvas id="gameCanvas" width="600" height="700"></canvas>
+
+    <div class="controls">
+      <button class="btn btn-primary" id="startBtn">Start Game</button>
+      <button class="btn btn-secondary" id="restartBtn">Restart</button>
+    </div>
+
+    <div class="level-select">
+      <button class="level-btn active" data-level="1">1</button>
+      <button class="level-btn" data-level="2">2</button>
+      <button class="level-btn" data-level="3">3</button>
+      <button class="level-btn" data-level="4">4</button>
+      <button class="level-btn" data-level="5">5</button>
+    </div>
+
+    <div class="instructions">
+      <p>
+        <strong>How to Play:</strong><br>
+        Swipe or tap adjacent pieces to match 3+ of the same color.<br>
+        <kbd>P</kbd> Pause | <kbd>R</kbd> Restart | <kbd>Esc</kbd> Menu
+      </p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { Game } from '../src/game/Game.ts';
+
+    // ゲームインスタンス
+    let game;
+    let selectedLevel = 1;
+
+    // DOM要素
+    const startBtn = document.getElementById('startBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const levelBtns = document.querySelectorAll('.level-btn');
+
+    // ゲーム初期化
+    function initGame() {
+      game = new Game('gameCanvas');
+    }
+
+    // スタートボタン
+    startBtn.addEventListener('click', () => {
+      if (game) {
+        game.start(selectedLevel);
+        startBtn.textContent = 'Playing...';
+        startBtn.disabled = true;
+      }
+    });
+
+    // リスタートボタン
+    restartBtn.addEventListener('click', () => {
+      if (game) {
+        game.start(selectedLevel);
+        startBtn.textContent = 'Playing...';
+        startBtn.disabled = true;
+      }
+    });
+
+    // レベル選択
+    levelBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        levelBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedLevel = parseInt(btn.dataset.level);
+
+        if (game) {
+          game.start(selectedLevel);
+          startBtn.textContent = 'Playing...';
+          startBtn.disabled = true;
+        }
+      });
+    });
+
+    // 初期化
+    window.addEventListener('load', () => {
+      initGame();
+      console.log('🎮 Game initialized! Click "Start Game" to play.');
+    });
+  </script>
+</body>
+</html>
